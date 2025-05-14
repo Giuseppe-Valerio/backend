@@ -5,11 +5,13 @@ import com.valeriobarbershop.backend.dto.auth.RegisterRequest;
 import com.valeriobarbershop.backend.model.Ruolo;
 import com.valeriobarbershop.backend.model.Utente;
 import com.valeriobarbershop.backend.repository.UtenteRepository;
+import com.valeriobarbershop.backend.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -19,6 +21,9 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     public Utente register(RegisterRequest request) {
         if (!request.getPassword().equals(request.getConfermaPassword())) {
@@ -38,7 +43,7 @@ public class AuthService {
         return utenteRepository.save(utente);
     }
 
-    public Utente login(LoginRequest request) {
+    public Map<String, String> login(LoginRequest request) {
         Utente utente = utenteRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
@@ -46,6 +51,14 @@ public class AuthService {
             throw new RuntimeException("Credenziali errate");
         }
 
-        return utente;
+        String token = jwtUtils.generateToken(utente.getEmail());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        response.put("email", utente.getEmail());
+        response.put("nome", utente.getNome());
+        response.put("ruolo", utente.getRuolo().name());
+
+        return response;
     }
 }
