@@ -7,6 +7,9 @@ import com.valeriobarbershop.backend.model.Utente;
 import com.valeriobarbershop.backend.repository.UtenteRepository;
 import com.valeriobarbershop.backend.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class AuthService {
+public class AuthService implements UserDetailsService {
 
     @Autowired
     private UtenteRepository utenteRepository;
@@ -25,6 +28,7 @@ public class AuthService {
     @Autowired
     private JwtUtils jwtUtils;
 
+    // Metodo per registrazione
     public Utente register(RegisterRequest request) {
         if (!request.getPassword().equals(request.getConfermaPassword())) {
             throw new RuntimeException("Le password non coincidono");
@@ -43,6 +47,7 @@ public class AuthService {
         return utenteRepository.save(utente);
     }
 
+    // Metodo per login
     public Map<String, String> login(LoginRequest request) {
         Utente utente = utenteRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
@@ -60,5 +65,18 @@ public class AuthService {
         response.put("ruolo", utente.getRuolo().name());
 
         return response;
+    }
+
+    // 👇 Nuovo metodo aggiunto
+    @Override
+    public UserDetails loadUserByUsername(String email) {
+        Utente utente = utenteRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato"));
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(utente.getEmail())
+                .password(utente.getPassword())
+                .roles(utente.getRuolo().name())
+                .build();
     }
 }

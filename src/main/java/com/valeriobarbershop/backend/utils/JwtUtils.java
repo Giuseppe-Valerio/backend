@@ -12,7 +12,7 @@ import java.util.Map;
 @Component
 public class JwtUtils {
 
-    // Usa una chiave HMAC-SHA idonea per HS512 (minimo 512 bit)
+    // Genera una chiave sicura per HS512
     private final Key SECRET_KEY = Keys.hmacShaKeyFor(Keys.secretKeyFor(SignatureAlgorithm.HS512).getEncoded());
     private long EXPIRATION = 86400000; // 24 ore
 
