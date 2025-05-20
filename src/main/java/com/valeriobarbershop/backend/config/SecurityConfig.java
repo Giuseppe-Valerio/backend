@@ -16,16 +16,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .formLogin(formLogin -> formLogin.disable())
+                .httpBasic(basic -> basic.disable())
+                .formLogin(login -> login.disable())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/prenotazioni/me").hasRole("CLIENTE") // o hasRole("CLIENTE")
+                        .requestMatchers("/api/prenotazioni/me").hasAnyRole("CLIENTE", "ADMIN")
+                        .requestMatchers("/api/prenotazioni").authenticated() // 👈 Proteggi solo gli utenti loggati
                         .anyRequest().denyAll()
                 );
-
         return http.build();
     }
 
