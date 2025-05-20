@@ -9,7 +9,6 @@ import com.valeriobarbershop.backend.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +27,9 @@ public class AuthService implements UserDetailsService {
     @Autowired
     private JwtUtils jwtUtils;
 
-    // Metodo per registrazione
+    /**
+     * Registrazione di un nuovo cliente
+     */
     public Utente register(RegisterRequest request) {
         if (!request.getPassword().equals(request.getConfermaPassword())) {
             throw new RuntimeException("Le password non coincidono");
@@ -47,7 +48,9 @@ public class AuthService implements UserDetailsService {
         return utenteRepository.save(utente);
     }
 
-    // Metodo per login
+    /**
+     * Login dell'utente e generazione del token JWT
+     */
     public Map<String, String> login(LoginRequest request) {
         Utente utente = utenteRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
@@ -67,11 +70,13 @@ public class AuthService implements UserDetailsService {
         return response;
     }
 
-    // 👇 Nuovo metodo aggiunto
+    /**
+     * Carica i dettagli dell'utente per Spring Security
+     */
     @Override
     public UserDetails loadUserByUsername(String email) {
         Utente utente = utenteRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato"));
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(utente.getEmail())

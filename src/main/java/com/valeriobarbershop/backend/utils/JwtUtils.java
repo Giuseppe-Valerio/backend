@@ -1,8 +1,8 @@
 package com.valeriobarbershop.backend.utils;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,16 +17,12 @@ public class JwtUtils implements InitializingBean {
     private String secretString;
 
     @Value("${app.jwt.expiration}")
-    private long expiration; // Ora caricato da application.properties
+    private long expiration;
 
     private Key SECRET_KEY;
 
     @Override
     public void afterPropertiesSet() {
-        if (secretString == null || secretString.isBlank()) {
-            throw new IllegalArgumentException("JWT secret non configurato in application.properties");
-        }
-        // Decodifica la chiave Base64
         byte[] keyBytes = Decoders.BASE64.decode(secretString);
         this.SECRET_KEY = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -48,9 +44,7 @@ public class JwtUtils implements InitializingBean {
         try {
             getClaimsFromToken(token);
             return true;
-        } catch (JwtException | IllegalArgumentException ex) {
-            // Log dell'errore (aggiungi un logger se necessario)
-            System.err.println("Token validation error: " + ex.getMessage());
+        } catch (JwtException ex) {
             return false;
         }
     }
@@ -61,9 +55,5 @@ public class JwtUtils implements InitializingBean {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    public Claims extractAllClaims(String token) {
-        return getClaimsFromToken(token);
     }
 }

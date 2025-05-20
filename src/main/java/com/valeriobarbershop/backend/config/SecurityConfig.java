@@ -23,9 +23,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/prenotazioni/me").hasAnyRole("CLIENTE", "ADMIN")
-                        .requestMatchers("/api/prenotazioni").authenticated() // 👈 Proteggi solo gli utenti loggati
+                        .requestMatchers("/api/prenotazioni").authenticated()
+                        .requestMatchers("/api/servizi").authenticated() // 👈 Solo admin può gestire i servizi
                         .anyRequest().denyAll()
                 );
+
         return http.build();
     }
 
