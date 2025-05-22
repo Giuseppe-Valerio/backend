@@ -1,7 +1,11 @@
 package com.valeriobarbershop.backend.controller;
 
 import com.valeriobarbershop.backend.model.Prenotazione;
+import com.valeriobarbershop.backend.model.StatoPrenotazione;
+import com.valeriobarbershop.backend.model.Utente;
 import com.valeriobarbershop.backend.repository.PrenotazioneRepository;
+import com.valeriobarbershop.backend.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,6 +15,9 @@ import java.util.List;
 public class PrenotazioneController {
 
     private final PrenotazioneRepository repository;
+
+    @Autowired
+    private AuthService authService;
 
     public PrenotazioneController(PrenotazioneRepository repository) {
         this.repository = repository;
@@ -28,9 +35,30 @@ public class PrenotazioneController {
         return repository.save(prenotazione);
     }
 
-    // GET /api/prenotazioni/me - Solo prenotazioni dell'utente loggato (da migliorare in futuro)
+    // GET /api/prenotazioni/me - Solo prenotazioni dell'utente loggato
     @GetMapping("/me")
-    public String getPrenotazioniUtenteLoggato() {
-        return "Questa è la lista delle prenotazioni dell'utente loggato";
+    public List<Prenotazione> getPrenotazioniUtenteLoggato() {
+        Utente utente = authService.getUtenteAutenticato();
+        return repository.findByClienteEmail(utente.getEmail());
+    }
+    @PutMapping("/{id}")
+    public Prenotazione updatePrenotazione(@PathVariable Long id, @RequestBody Prenotazione prenotazioneAggiornata) {
+        return repository.findById(id)
+                .map(prenotazione -> {
+                    prenotazione.setDataOra(prenotazioneAggiornata.getDataOra());
+                    prenotazione.setServizio(prenotazioneAggiornata.getServizio());
+                    return repository.save(prenotazione);
+                })
+                .orElseThrow(() -> new RuntimeException("Prenotazione non trovata"));
+    }
+
+    @PatchMapping("/{id}/annulla")
+    public Prenotazione annullaPrenotazione(@PathVariable Long id) {
+        return repository.findById(id)
+                .map(prenotazione -> {
+                    prenotazione.setStato(StatoPrenotazione.ANNULLATA);
+                    return repository.save(prenotazione);
+                })
+                .orElseThrow(() -> new RuntimeException("Prenotazione non trovata"));
     }
 }

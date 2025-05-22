@@ -29,5 +29,7 @@ public class Prenotazione {
     @Column(nullable = false)
     private LocalDateTime dataOra;
 
-    private String stato; // es. "confermata", "annullata"
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatoPrenotazione stato = StatoPrenotazione.CONFERMATA;
 }
