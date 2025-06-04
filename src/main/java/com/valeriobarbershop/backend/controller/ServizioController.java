@@ -1,10 +1,12 @@
 package com.valeriobarbershop.backend.controller;
 
+import com.valeriobarbershop.backend.dto.servizio.ServizioDTO;
 import com.valeriobarbershop.backend.model.Servizio;
 import com.valeriobarbershop.backend.repository.ServizioRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/servizi")
@@ -16,10 +18,17 @@ public class ServizioController {
         this.repository = repository;
     }
 
-    // GET - Tutti i servizi
+    // GET - Tutti i servizi (con DTO)
     @GetMapping
-    public List<Servizio> getAll() {
-        return repository.findAll();
+    public List<ServizioDTO> getAll() {
+        return repository.findAll().stream()
+                .map(servizio -> new ServizioDTO(
+                        servizio.getId(),
+                        servizio.getNome(),
+                        servizio.getDescrizione(),
+                        servizio.getDurataMinuti(),
+                        servizio.getPrezzo()))
+                .collect(Collectors.toList());
     }
 
     // POST - Crea un nuovo servizio

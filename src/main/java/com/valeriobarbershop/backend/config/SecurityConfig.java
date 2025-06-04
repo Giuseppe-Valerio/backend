@@ -1,6 +1,7 @@
 package com.valeriobarbershop.backend.config;
 
 import com.valeriobarbershop.backend.filter.JwtFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +12,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
@@ -24,7 +26,8 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/prenotazioni/me").hasAnyRole("CLIENTE", "ADMIN")
                         .requestMatchers("/api/prenotazioni").authenticated()
-                        .requestMatchers("/api/servizi").authenticated() // 👈 Solo admin può gestire i servizi
+                        .requestMatchers("/api/servizi").permitAll()
+                        .requestMatchers("/api/prenotazioni/slots").permitAll()
                         .anyRequest().denyAll()
                 );
 
@@ -35,4 +38,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

@@ -12,4 +12,8 @@ public enum StatoPrenotazione {
     StatoPrenotazione(String label) {
         this.label = label;
     }
+
+    public static StatoPrenotazione fromString(String value) {
+        return valueOf(value.toUpperCase());
+    }
 }
