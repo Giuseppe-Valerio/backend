@@ -1,0 +1,21 @@
+package com.valeriobarbershop.backend.dto.prenotazione;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class SlotOrarioDTO {
+
+    private LocalDateTime dataOra;  // Campo principale per la prenotazione
+    private Long servizioId;        // Deve essere Long per funzionare con findById()
+
+    // Se ti servono anche questi per mostrare gli slot orari disponibili:
+    private LocalTime inizio;
+    private LocalTime fine;
+    private boolean disponibile;
+}
